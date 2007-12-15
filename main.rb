@@ -2,6 +2,17 @@ require "wx"
 require "starruby"
 require "texture_panel"
 
+module Wx
+  class DC
+    def draw_texture(texture, x, y)
+      image = Wx::Image.new(texture.width, texture.height)
+      image.data = texture.dump("rgb")
+      bitmap = Wx::Bitmap.new(image)
+      draw_bitmap(bitmap, x, y, false)
+    end
+  end
+end
+
 module Asterism
 
   class MainFrame < Wx::Frame
