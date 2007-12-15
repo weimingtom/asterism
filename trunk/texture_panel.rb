@@ -12,11 +12,7 @@ module Asterism
       @texture.render_text("Star Ruby rules!!", 8, 8, font, color, true)
       evt_paint do |e|
         paint do |dc|
-          dc.clear
-          image = Wx::Image.new(@texture.width, @texture.height)
-          image.data = @texture.dump("rgb")
-          bitmap = Wx::Bitmap.new(image)
-          dc.draw_bitmap(bitmap, 0, 0, false)
+          dc.draw_texture(@texture, 0, 0)
         end
       end
       evt_size do |e|
