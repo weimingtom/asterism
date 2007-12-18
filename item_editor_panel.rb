@@ -14,14 +14,14 @@ module Asterism
       l1 = Wx::StaticText.new(self, -1, "Name:")
       t1 = Wx::TextCtrl.new(self, (id += 1))
       t1.value = data[:name] if data.include?(:name)
-      evt_text(t1.id) do |e|
+      evt_text(t1.get_id) do |e|
         @data[:name] = e.string
       end
       
       l2 = Wx::StaticText.new(self, -1, "Cost:")
       t2 = Wx::TextCtrl.new(self, (id += 1))
       t2.value = data[:cost] if data.include?(:cost)
-      evt_text(t2.id) do |e|
+      evt_text(t2.get_id) do |e|
         @data[:cost] = e.string
       end
       

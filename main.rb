@@ -35,7 +35,7 @@ module Asterism
       id = Wx::ID_HIGHEST
       buttons_sizer = Wx::BoxSizer.new(Wx::HORIZONTAL)
       b = Wx::Button.new(panel, (id += 1), "OK", :size => [100, 30])
-      evt_button(b.id) do |e|
+      evt_button(b.get_id) do |e|
         open("data", "w") do |fp|
           fp.puts("{")
           begin
@@ -58,7 +58,7 @@ module Asterism
       buttons_sizer.add(b, 0)
       buttons_sizer.add(10, 0)
       b = Wx::Button.new(panel, (id += 1), "Cancel", :size => [100, 30])
-      evt_button(b.id) do |e|
+      evt_button(b.get_id) do |e|
         close
       end
       buttons_sizer.add(b, 0)
