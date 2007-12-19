@@ -1,4 +1,5 @@
 require "wx"
+require "starruby"
 
 module Wx
   class DC
@@ -65,7 +66,7 @@ module Asterism
       sizer.add(buttons_sizer, 0, Wx::ALIGN_BOTTOM | Wx::ALIGN_RIGHT)
       
       panel.sizer = Wx::BoxSizer.new(Wx::HORIZONTAL)
-      panel.sizer.add(sizer, 1, Wx::EXPAND | Wx::ALL, 10)
+      panel.sizer.add(sizer, 1, Wx::EXPAND | Wx::ALL, 20)
     end
   end
   

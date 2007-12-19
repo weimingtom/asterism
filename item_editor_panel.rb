@@ -25,9 +25,10 @@ module Asterism
         @data[:cost] = e.string
       end
       
-      sizer = Wx::FlexGridSizer.new(0, 2, 10, 10)
+      sizer = Wx::FlexGridSizer.new(0, 1, 5, 5)
       sizer.add(l1)
       sizer.add(t1)
+      sizer.add(0, 5)
       sizer.add(l2)
       sizer.add(t2)
       
