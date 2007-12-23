@@ -1,0 +1,10 @@
+- :name: Item
+  :columns:
+    - :name: Name
+      :type: :string
+    - :name: Cost
+      :type: :integer
+- :name: Skill
+  :columns:
+    - :name: Name
+      :type: :string

@@ -1,5 +1,6 @@
 require "wx"
 require "starruby"
+require "yaml"
 
 module Wx
   class DC
@@ -12,61 +13,81 @@ module Wx
   end
 end
 
-require "item_editor_panel"
+require "model_editor"
 
 module Asterism
+  
+  class ModelSelector < Wx::TreeCtrl
+    
+    def initialize(parent, editor_panel, models)
+      super(parent, :style => Wx::TR_SINGLE | Wx::TR_DEFAULT_STYLE)
+      root = add_root("Models")
+      select_item(root)
+      nodes   = {}
+      editors = {}
+      models.each do |model|
+        nodes[model] = append_item(root, model[:name])
+        editor = editors[model] = ModelEditor.new(editor_panel, model, [])
+        editor_panel.sizer.add(editor, 0, Wx::EXPAND | Wx::ALL)
+        editor.hide
+      end
+      evt_tree_sel_changed(get_id) do |e|
+        editors.values.each{|v| v.hide}
+        if editor = editors[nodes.index(e.item)]
+          editor.show
+          editor_panel.sizer.recalc_sizes
+        end
+      end
+      
+      expand_all
+    end
+    
+  end
+  
   class MainFrame < Wx::Frame
     def initialize(title)
-      super(nil, :title => title)
+      super(nil, :title => title, :size => [640, 480])
       center(Wx::BOTH)
       
-      panel_sizer = Wx::BoxSizer.new(Wx::HORIZONTAL)
-      panel_sizer.add((panel = Wx::Panel.new(self)), 1, Wx::EXPAND | Wx::ALL)
-      self.sizer = panel_sizer
+      # menu bar
+      menu_help = Wx::Menu.new
+      menu_bar = Wx::MenuBar.new
+      menu_bar.append(menu_help, "&Help")
+      self.menu_bar = menu_bar
       
-      sizer = Wx::BoxSizer.new(Wx::VERTICAL)
-      data = {}
-      if File.file?("data")
-        open("data", "r") do |fp|
-          data = eval(fp.read)
-        end
+      # status bar
+      create_status_bar
+      
+      # project
+      models = nil
+      open("project1.yaml") do |fp|
+        models = YAML.load(fp)
       end
-      sizer.add(ItemEditorPanel.new(panel, data), 1, Wx::ALIGN_TOP | Wx::ALL)
-      
-      id = Wx::ID_HIGHEST
-      buttons_sizer = Wx::BoxSizer.new(Wx::HORIZONTAL)
-      b = Wx::Button.new(panel, (id += 1), "OK", :size => [100, 30])
-      evt_button(b.get_id) do |e|
-        open("data", "w") do |fp|
-          fp.puts("{")
-          begin
-            data.each do |key, value|
-              case value
-              when String
-                fp.puts("  #{key.inspect} => #{value.dump},")
-              when Symbol
-                fp.puts("  #{key.inspect} => #{value.inspect},")
-              when Integer
-                fp.puts("  #{key.inspect} => #{value},")
-              end
-            end
-          ensure
-            fp.puts("}")
+
+      main_splitter_class = Class.new(Wx::SplitterWindow)
+      main_splitter_class.class_eval %Q{
+        def initialize(parent)
+          super(parent)
+          evt_splitter_sash_pos_changed(object_id) do |e|
+            e.sash_position = self.sash_position = 200
           end
-          close
+          evt_splitter_sash_pos_changing(object_id) do |e|
+            e.sash_position = self.sash_position = 200
+          end
         end
-      end
-      buttons_sizer.add(b, 0)
-      buttons_sizer.add(10, 0)
-      b = Wx::Button.new(panel, (id += 1), "Cancel", :size => [100, 30])
-      evt_button(b.get_id) do |e|
-        close
-      end
-      buttons_sizer.add(b, 0)
-      sizer.add(buttons_sizer, 0, Wx::ALIGN_BOTTOM | Wx::ALIGN_RIGHT)
+      }
+      splitter = main_splitter_class.new(self)
       
-      panel.sizer = Wx::BoxSizer.new(Wx::HORIZONTAL)
-      panel.sizer.add(sizer, 1, Wx::EXPAND | Wx::ALL, 20)
+      editor_panel = Wx::Panel.new(splitter)
+      editor_panel.background_colour = Wx::Colour.new("GREY")
+      editor_panel.sizer = Wx::BoxSizer.new(Wx::VERTICAL)
+      
+      panel = Wx::Panel.new(splitter)
+      panel.sizer = Wx::BoxSizer.new(Wx::VERTICAL)
+      panel.sizer.add(ModelSelector.new(panel, editor_panel, models), 1, Wx::EXPAND | Wx::ALL)
+      
+      splitter.split_vertically(panel, editor_panel, 200)
+      splitter.minimum_pane_size = 20
     end
   end
   
