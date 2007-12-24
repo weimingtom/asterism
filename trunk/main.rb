@@ -15,6 +15,7 @@ module Wx
 end
 
 require "model_editor"
+require "model"
 require "controller"
 
 module Asterism
@@ -30,7 +31,8 @@ module Asterism
       model_schemas.each do |schema|
         name = schema[:name]
         nodes[name] = append_item(root, name)
-        controller = Controller.new(YAML::Store.new("data/#{name}.yaml"))
+        model = Model.new(YAML::Store.new("data/#{name}.yaml"))
+        controller = Controller.new(model)
         editor = editors[name] = ModelEditor.new(editor_panel, controller)
         editor_panel.sizer.add(editor, 1, Wx::EXPAND)
         editor.hide
