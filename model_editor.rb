@@ -33,7 +33,7 @@ module Asterism
         def on_updated(e)
           case e.type
           when :init
-            controller.each do |model_id|
+            controller.each_model_id do |model_id|
               add_model_item(controller[model_id, :name])
             end
           when :add_item
