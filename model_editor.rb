@@ -6,8 +6,6 @@ module Asterism
   class ModelEditor < Wx::Panel
     
     def initialize(parent, controller)
-      id = Wx::ID_HIGHEST
-      
       super(parent)
       
       splitter = Wx::SplitterWindow.new(self)
@@ -27,7 +25,8 @@ module Asterism
             def on_updated_model(operate, model_item)
             end
           }
-          item.controller = Controller.new(model)
+          ctrl = item.controller = Controller.new(model)
+          set_item_data(index, ctrl)
         end
         
         private :add_model_item
@@ -35,10 +34,8 @@ module Asterism
         def on_updated_model(operate, model)
           case operate
           when :init
-            model.transaction do
-              model.roots.sort.each do |id|
-                add_model_item(model[id])
-              end
+            model.each do |m|
+              add_model_item(m)
             end
             refresh
           when :add
@@ -46,14 +43,31 @@ module Asterism
             refresh
           end
         end
+        
+        def sort_mode
+          @sort_mode
+        end
+        
+        def sort_mode=(val)
+          @sort_mode = val
+        end
       }
       list.controller = controller
       list.insert_column(0, "Name")
-      list.set_column_width(0, 180)
+      list.set_column_width(0, 160)
+      evt_list_col_click(list.get_id) do |e|
+        if list.sort_mode == :up
+          list.sort_mode = :down
+          list.sort_items {|a, b| b.model_name <=> a.model_name}
+        else
+          list.sort_mode = :up
+          list.sort_items {|a, b| a.model_name <=> b.model_name}
+        end
+      end
       
-      add_button = Wx::Button.new(list_panel, id += 1, :label => "Add")
+      add_button = Wx::Button.new(list_panel, -1, :label => "Add")
       evt_button(add_button.get_id) do |e|
-        controller.add(controller.next_id, {:name => ""})
+        controller.add(controller.next_id, {:name => rand(100).to_s})
       end
       
       button_sizer = Wx::BoxSizer.new(Wx::HORIZONTAL)
