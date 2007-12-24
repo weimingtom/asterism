@@ -24,7 +24,16 @@ module Asterism
     def add_view(view)
       unless @views.include?(view)
         @views << view
-        on_updated_model(:init, @model)
+        if @model.kind_of?(PStore)
+          models = @model.transaction do
+            @model.roots.sort.map do |id|
+              @model[id]
+            end
+          end
+          on_updated_model(:init, models)
+        else
+          on_updated_model(:init, @model)
+        end
       end
     end
     
@@ -36,6 +45,10 @@ module Asterism
       @model.transaction do
         (@model.roots.max || 0) + 1
       end
+    end
+    
+    def model_name
+      @model[:name]
     end
     
     protected
