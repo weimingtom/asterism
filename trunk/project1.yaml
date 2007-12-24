@@ -1,10 +1,9 @@
-- :name: Item
-  :columns:
-    - :name: Name
-      :type: :string
-    - :name: Cost
-      :type: :integer
-- :name: Skill
-  :columns:
-    - :name: Name
-      :type: :string
+:model_schemas:
+  - :name: Map
+    :columns: {}
+  - :name: Item
+    :columns:
+      - :name: Cost
+        :type: :integer
+  - :name: Skill
+    :columns:
