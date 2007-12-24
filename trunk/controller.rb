@@ -37,7 +37,7 @@ module Asterism
       end
     end
     
-    def each
+    def each_model_id
       @model.each_id do |model_id|
         yield(model_id)
       end
