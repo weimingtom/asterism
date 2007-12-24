@@ -17,31 +17,29 @@ module Asterism
       (class << list; self; end).class_eval %Q{
         include View
         
-        def add_model_item(model)
-          index = insert_item(item_count, model[:name])
-          item = get_item(index)
-          (class << item; self; end).class_eval %Q{
+        def add_model_item(name)
+          index = insert_item(item_count, name)
+          (class << get_item(index); self; end).class_eval %Q{
             include View
-            def on_updated_model(operate, model_item)
+            def on_updated(e)
             end
           }
-          ctrl = item.controller = Controller.new(model)
-          set_item_data(index, ctrl)
+          # ctrl = item.controller = Controller.new(model)
+          # set_item_data(index, ctrl)
         end
         
         private :add_model_item
         
-        def on_updated_model(operate, model)
-          case operate
+        def on_updated(e)
+          case e.type
           when :init
-            model.each do |m|
-              add_model_item(m)
+            controller.each do |model_id|
+              add_model_item(controller[model_id, :name])
             end
-            refresh
-          when :add
-            add_model_item(model)
-            refresh
+          when :add_item
+            add_model_item(controller[e.model_id, :name])
           end
+          refresh
         end
         
         def sort_mode
@@ -56,6 +54,7 @@ module Asterism
       list.insert_column(0, "Name")
       list.set_column_width(0, 160)
       evt_list_col_click(list.get_id) do |e|
+=begin
         if list.sort_mode == :up
           list.sort_mode = :down
           list.sort_items {|a, b| b.model_name <=> a.model_name}
@@ -63,11 +62,12 @@ module Asterism
           list.sort_mode = :up
           list.sort_items {|a, b| a.model_name <=> b.model_name}
         end
+=end
       end
       
       add_button = Wx::Button.new(list_panel, -1, :label => "Add")
       evt_button(add_button.get_id) do |e|
-        controller.add(controller.next_id, {:name => rand(100).to_s})
+        controller.add_item
       end
       
       button_sizer = Wx::BoxSizer.new(Wx::HORIZONTAL)

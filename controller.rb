@@ -4,36 +4,26 @@ module Asterism
     
     def initialize(model)
       @model = model
+      @model.add_controller(self)
       @views = []
     end
     
-    def update_attr(key, value)
-      @model[key] = value
+    def [](model_id, key)
+      @model[model_id, key]
     end
     
-    def add(key, value)
-      @model.transaction do
-        @model[key] = value
-        on_updated_model(:add, value)
-      end
+    def []=(model_id, key, value)
+      @model[model_id, key] = value
     end
     
-    def remove(key)
+    def add_item
+      @model.add_item
     end
     
     def add_view(view)
       unless @views.include?(view)
         @views << view
-        if @model.kind_of?(PStore)
-          models = @model.transaction do
-            @model.roots.sort.map do |id|
-              @model[id]
-            end
-          end
-          on_updated_model(:init, models)
-        else
-          on_updated_model(:init, @model)
-        end
+        @model.init
       end
     end
     
@@ -41,21 +31,15 @@ module Asterism
       @views.delete(view)
     end
     
-    def next_id
-      @model.transaction do
-        (@model.roots.max || 0) + 1
+    def on_updated(e)
+      @views.each do |view|
+        view.on_updated(e)
       end
     end
     
-    def model_name
-      @model[:name]
-    end
-    
-    protected
-    
-    def on_updated_model(operate, model)
-      @views.each do |view|
-        view.on_updated_model(operate, model)
+    def each
+      @model.each_id do |model_id|
+        yield(model_id)
       end
     end
     
