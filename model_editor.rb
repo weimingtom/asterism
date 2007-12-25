@@ -24,8 +24,6 @@ module Asterism
             def on_updated(e)
             end
           }
-          # ctrl = item.controller = Controller.new(model)
-          # set_item_data(index, ctrl)
         end
         
         private :add_model_item
@@ -34,7 +32,6 @@ module Asterism
           controller.each_model_id do |model_id|
             add_model_item(model_id)
           end
-          sort
           refresh
         end
         
