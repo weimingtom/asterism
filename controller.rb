@@ -23,7 +23,7 @@ module Asterism
     def add_view(view)
       unless @views.include?(view)
         @views << view
-        @model.init
+        view.on_init
       end
     end
     
