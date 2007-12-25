@@ -24,12 +24,6 @@ module Asterism
       on_updated(e)
     end
     
-    def init
-      e = UpdatedEventArgs.new
-      e.type = :init
-      on_updated(e)
-    end
-    
     def add_item
       e = UpdatedEventArgs.new
       @store.transaction do

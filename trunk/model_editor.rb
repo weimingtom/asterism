@@ -12,13 +12,13 @@ module Asterism
       
       list_panel = Wx::Panel.new(splitter)
       
-      style = Wx::LC_REPORT | Wx::LC_HRULES | Wx::LC_VRULES
+      style = Wx::LC_REPORT | Wx::LC_HRULES | Wx::LC_VRULES | Wx::LC_SORT_ASCENDING
       list = Wx::ListCtrl.new(list_panel, :style => style)
       (class << list; self; end).class_eval %Q{
         include View
         
-        def add_model_item(name)
-          index = insert_item(item_count, name)
+        def add_model_item(model_id)
+          index = insert_item(0, controller[model_id, :name])
           (class << get_item(index); self; end).class_eval %Q{
             include View
             def on_updated(e)
@@ -30,40 +30,25 @@ module Asterism
         
         private :add_model_item
         
-        def on_updated(e)
-          case e.type
-          when :init
-            controller.each_model_id do |model_id|
-              add_model_item(controller[model_id, :name])
-            end
-          when :add_item
-            add_model_item(controller[e.model_id, :name])
+        def on_init
+          controller.each_model_id do |model_id|
+            add_model_item(model_id)
           end
+          sort
           refresh
         end
         
-        def sort_mode
-          @sort_mode
-        end
-        
-        def sort_mode=(val)
-          @sort_mode = val
+        def on_updated(e)
+          case e.type
+          when :add_item
+            add_model_item(e.model_id)
+          end
+          refresh
         end
       }
       list.controller = controller
       list.insert_column(0, "Name")
       list.set_column_width(0, 160)
-      evt_list_col_click(list.get_id) do |e|
-=begin
-        if list.sort_mode == :up
-          list.sort_mode = :down
-          list.sort_items {|a, b| b.model_name <=> a.model_name}
-        else
-          list.sort_mode = :up
-          list.sort_items {|a, b| a.model_name <=> b.model_name}
-        end
-=end
-      end
       
       add_button = Wx::Button.new(list_panel, -1, :label => "Add")
       evt_button(add_button.get_id) do |e|
